@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://cyberpulse.dev/sitemap.xml
