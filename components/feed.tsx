@@ -13,9 +13,13 @@ const S200 = "#E5E7EB";
 const S100 = "#F3F4F6";
 const S50 = "#F9FAFB";
 const WHITE = "#FFFFFF";
+const PAYWALL_BG = "#FEF9C3";
+const PAYWALL_TEXT = "#A16207";
+const PAYWALL_BORDER = "#FDE68A";
 
 const CATEGORIES = [
   { key: "all", label: "All" },
+  { key: "executive", label: "Executive" },
   { key: "threat-intel", label: "Threat Intel" },
   { key: "vulnerabilities", label: "Vulnerabilities" },
   { key: "ransomware", label: "Ransomware" },
@@ -50,7 +54,11 @@ export default function Feed({
 
   const filtered = useMemo(() => {
     let r = articles;
-    if (cat !== "all") r = r.filter((a) => a.tags.includes(cat));
+    if (cat === "executive") {
+      r = r.filter((a) => a.audience === "executive" || a.audience === "both");
+    } else if (cat !== "all") {
+      r = r.filter((a) => a.tags.includes(cat));
+    }
     if (q.trim()) {
       const lq = q.toLowerCase();
       r = r.filter(
@@ -71,6 +79,17 @@ export default function Feed({
     month: "long",
     day: "numeric",
   });
+
+  // Count for executive chip
+  const execCount = articles.filter(
+    (a) => a.audience === "executive" || a.audience === "both"
+  ).length;
+
+  function chipCount(key: string): number {
+    if (key === "all") return articles.length;
+    if (key === "executive") return execCount;
+    return articles.filter((a) => a.tags.includes(key)).length;
+  }
 
   return (
     <>
@@ -94,12 +113,7 @@ export default function Feed({
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 2,
-              background: BLUE,
-            }}
+            style={{ width: 8, height: 8, borderRadius: 2, background: BLUE }}
           />
           <span
             style={{
@@ -159,7 +173,7 @@ export default function Feed({
             color: NAVY,
           }}
         >
-          Today's Cybersecurity Intelligence
+          Today&#39;s Cybersecurity Intelligence
         </h1>
         <p style={{ fontSize: 15, color: S500, lineHeight: 1.6 }}>
           {today}. Aggregated from {sourceCount} trusted sources, updated every
@@ -181,10 +195,8 @@ export default function Feed({
         >
           {CATEGORIES.map((c) => {
             const active = cat === c.key;
-            const count =
-              c.key === "all"
-                ? articles.length
-                : articles.filter((a) => a.tags.includes(c.key)).length;
+            const count = chipCount(c.key);
+            const isExec = c.key === "executive";
             return (
               <button
                 key={c.key}
@@ -193,14 +205,20 @@ export default function Feed({
                   setShow(25);
                 }}
                 style={{
-                  background: active ? BLUE : WHITE,
-                  border: `1px solid ${active ? BLUE : S200}`,
+                  background: active
+                    ? isExec
+                      ? NAVY
+                      : BLUE
+                    : WHITE,
+                  border: `1px solid ${
+                    active ? (isExec ? NAVY : BLUE) : S200
+                  }`,
                   borderRadius: 6,
                   padding: "7px 14px",
                   cursor: "pointer",
                   fontSize: 13,
                   fontWeight: active ? 600 : 500,
-                  color: active ? WHITE : S700,
+                  color: active ? WHITE : isExec ? NAVY : S700,
                   fontFamily: "'Inter', sans-serif",
                   transition: "all 0.15s ease",
                 }}
@@ -379,6 +397,26 @@ export default function Feed({
                   <span style={{ fontSize: 12, color: S500 }}>
                     {relativeTime(a.hoursAgo)}
                   </span>
+
+                  {/* Paywall tag */}
+                  {a.paywalled && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: PAYWALL_TEXT,
+                        background: PAYWALL_BG,
+                        border: `1px solid ${PAYWALL_BORDER}`,
+                        borderRadius: 4,
+                        padding: "2px 7px",
+                        letterSpacing: "0.02em",
+                      }}
+                    >
+                      paywall
+                    </span>
+                  )}
+
+                  {/* Topic tags */}
                   {a.tags
                     .filter((t) => t !== "general")
                     .map((tag) => (
