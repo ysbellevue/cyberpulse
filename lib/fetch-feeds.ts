@@ -24,7 +24,7 @@ const TAG_RULES: { tags: string[]; keywords: string[] }[] = [
   { tags: ["vulnerabilities"], keywords: ["vulnerability", "cve-", "zero-day", "0day", "exploit", "patch", "rce", "critical flaw", "buffer overflow", "patch tuesday"] },
   { tags: ["cloud-security"], keywords: ["cloud", "aws", "azure", "gcp", "s3 bucket", "iam", "kubernetes", "container", "serverless"] },
   { tags: ["privacy-policy"], keywords: ["privacy", "gdpr", "regulation", "compliance", "policy", "legislation", "ftc", "sec ", "sanction", "data protection"] },
-  { tags: ["ai-security"], keywords: ["ai ", "artificial intelligence", "machine learning", "llm", "gpt", "chatgpt", "deepfake", "generative ai", "ai-powered"] },
+  { tags: ["ai-security"], keywords: ["ai ", "artificial intelligence", "machine learning", "llm", "gpt", "chatgpt", "deepfake", "gen ai", "ai-powered"] },
   { tags: ["devsecops"], keywords: ["devsecops", "sast", "dast", "ci/cd", "supply chain", "sbom", "open source", "dependency", "github actions"] },
   { tags: ["ics-ot"], keywords: ["ics", "scada", "operational technology", "industrial", "plc", "critical infrastructure"] },
   { tags: ["threat-intel"], keywords: ["apt", "threat actor", "campaign", "espionage", "nation-state", "lazarus", "fancy bear", "volt typhoon", "salt typhoon", "sandworm", "mandiant"] },
