@@ -15,6 +15,8 @@ export interface Article {
   publishedAt: string;
   hoursAgo: number;
   tags: string[];
+  paywalled: boolean;
+  audience: "practitioner" | "executive" | "both";
 }
 
 const TAG_RULES: { tags: string[]; keywords: string[] }[] = [
@@ -38,7 +40,7 @@ function autoTag(title: string): string[] {
     });
   });
   if (matched.size === 0) matched.add("general");
-  return [...matched];
+  return Array.from(matched);
 }
 
 function hoursAgo(dateStr: string | undefined): number {
@@ -62,10 +64,11 @@ async function fetchSingleFeed(source: Source): Promise<Article[]> {
         publishedAt: item.pubDate || item.isoDate || new Date().toISOString(),
         hoursAgo: Math.round(h * 10) / 10,
         tags: autoTag(item.title || ""),
+        paywalled: source.paywalled || false,
+        audience: source.audience || "practitioner",
       };
     }).filter((a) => a.title && a.url);
   } catch {
-    // Skip failed feeds silently
     return [];
   }
 }
@@ -97,6 +100,6 @@ export async function fetchAllFeeds(): Promise<Article[]> {
   // Assign sequential IDs
   deduped.forEach((a, i) => (a.id = i + 1));
 
-  // Cap at 200 most recent
-  return deduped.slice(0, 200);
+  // Cap at 300 most recent
+  return deduped.slice(0, 300);
 }
