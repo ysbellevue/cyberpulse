@@ -24,12 +24,32 @@ const TAG_RULES: { tags: string[]; keywords: string[] }[] = [
   { tags: ["vulnerabilities"], keywords: ["vulnerability", "cve-", "zero-day", "0day", "exploit", "patch", "rce", "critical flaw", "buffer overflow", "patch tuesday"] },
   { tags: ["cloud-security"], keywords: ["cloud", "aws", "azure", "gcp", "s3 bucket", "iam", "kubernetes", "container", "serverless"] },
   { tags: ["privacy-policy"], keywords: ["privacy", "gdpr", "regulation", "compliance", "policy", "legislation", "ftc", "sec ", "sanction", "data protection"] },
-  { tags: ["ai-security"], keywords: ["ai ", "artificial intelligence", "machine learning", "llm", "gpt", "chatgpt", "deepfake", "gen ai", "ai-powered"] },
+  { tags: ["ai-security"], keywords: ["ai ", "artificial intelligence", "machine learning", "llm", "gpt", "chatgpt", "deepfake", "generative ai", "ai-powered"] },
   { tags: ["devsecops"], keywords: ["devsecops", "sast", "dast", "ci/cd", "supply chain", "sbom", "open source", "dependency", "github actions"] },
   { tags: ["ics-ot"], keywords: ["ics", "scada", "operational technology", "industrial", "plc", "critical infrastructure"] },
   { tags: ["threat-intel"], keywords: ["apt", "threat actor", "campaign", "espionage", "nation-state", "lazarus", "fancy bear", "volt typhoon", "salt typhoon", "sandworm", "mandiant"] },
   { tags: ["appsec"], keywords: ["application security", "api security", "owasp", "injection", "xss", "csrf", "authentication bypass", "ssrf"] },
 ];
+
+// Broad cybersecurity relevance keywords — used to filter general feeds
+const CYBER_RELEVANCE_KEYWORDS = [
+  "cyber", "hack", "breach", "malware", "ransomware", "phishing",
+  "security", "privacy", "data leak", "data breach", "exploit",
+  "vulnerability", "zero-day", "threat", "attack", "ciso",
+  "infosec", "encryption", "firewall", "spyware", "botnet",
+  "credential", "authentication", "password", "identity theft",
+  "dark web", "darknet", "surveillance", "espionage",
+  "compliance", "regulation", "gdpr", "hipaa", "pci",
+  "incident response", "forensic", "siem", "edr", "soc ",
+  "nation-state", "apt", "fraud", "scam", "deepfake",
+  "artificial intelligence", "ai risk", "ai safety",
+  "disinformation", "misinformation",
+];
+
+function isCyberRelevant(title: string): boolean {
+  const lower = title.toLowerCase();
+  return CYBER_RELEVANCE_KEYWORDS.some((kw) => lower.includes(kw));
+}
 
 function autoTag(title: string): string[] {
   const lower = title.toLowerCase();
@@ -53,6 +73,8 @@ function hoursAgo(dateStr: string | undefined): number {
 async function fetchSingleFeed(source: Source): Promise<Article[]> {
   try {
     const feed = await parser.parseURL(source.rssUrl);
+    const isExecSource = source.audience === "executive";
+
     return (feed.items || []).slice(0, 20).map((item) => {
       const h = hoursAgo(item.pubDate || item.isoDate);
       return {
@@ -67,7 +89,10 @@ async function fetchSingleFeed(source: Source): Promise<Article[]> {
         paywalled: source.paywalled || false,
         audience: source.audience || "practitioner",
       };
-    }).filter((a) => a.title && a.url);
+    })
+    .filter((a) => a.title && a.url)
+    // Filter executive sources to only cyber-relevant articles
+    .filter((a) => !isExecSource || isCyberRelevant(a.title));
   } catch {
     return [];
   }
